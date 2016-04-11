@@ -1,0 +1,321 @@
+<html metal:use-macro="load: ../base.pt">
+
+  <div metal:fill-slot="content">
+    <script>
+      var oTable;
+
+      var rows_selected = [];
+      var is_alert = true;
+
+      var oTableUrl = "/pbb/rekon/realisasi/pospbb/grid/act";
+      $.fn.dataTable.ext.search.push(
+          function( oSettings, aData, iDataIndex ) {
+              var iFini = document.getElementById('date_from').value;
+              var iFfin = document.getElementById('date_to').value;
+              var iStartDateCol = 6;
+              var iEndDateCol = 7;
+              alert(iFini);
+              iFini=iFini.substring(6,10) + iFini.substring(3,5)+ iFini.substring(0,2);
+              iFfin=iFfin.substring(6,10) + iFfin.substring(3,5)+ iFfin.substring(0,2);
+       
+              var datofini=aData[iStartDateCol].substring(6,10) + aData[iStartDateCol].substring(3,5)+ aData[iStartDateCol].substring(0,2);
+              var datoffin=aData[iEndDateCol].substring(6,10) + aData[iEndDateCol].substring(3,5)+ aData[iEndDateCol].substring(0,2);
+       
+              if ( iFini === "" && iFfin === "" )
+              {
+                  return true;
+              }
+              else if ( iFini <= datofini && iFfin === "")
+              {
+                  return true;
+              }
+              else if ( iFfin >= datoffin && iFini === "")
+              {
+                  return true;
+              }
+              else if (iFini <= datofini && iFfin >= datoffin)
+              {
+                  return true;
+              }
+              return false;
+          }
+      );
+    
+      $(document).ready(function () {
+        oTable = $('#table1').DataTable({
+          "dom": '<"toolbar">ftlip',
+          "ajaxSource": oTableUrl,
+          "serverSide": true,
+          "processing": true,
+          "scrollCollapse": true,
+          "sort": true,
+          "info": false,
+          "filter": false,
+          "autoWidth": false,
+          "paginate": true,
+          "searching": true,
+          "paginationType": "full_numbers",
+          "order":[[6,'asc']],
+          "lengthMenu": [
+              [10, 25, 50, 100, -1],
+              [10, 25, 50, 100, "All"]
+          ],
+          columns:[{ data: "id",
+                       render: function ( data, type, row ) {
+                       return '<input type="checkbox" class="editor-active" value="'+data.id+'">';
+                       }},
+                     {data: "nop"},
+                     {data: "thn_pajak_sppt"},
+                     {data: "pembayaran_sppt_ke"},
+                     {data: "denda_sppt", sClass: "right"},
+                     {data: "jml_sppt_yg_dibayar", sClass: "right"},
+                     {data: "tgl_pembayaran_sppt"},
+                     
+                    ],
+          columnDefs: [
+            {
+                "targets": [ 0 ],
+                "searchable": false
+            },{
+                "targets": [ 1 ],
+                "visible": true,
+                "searchable": false,
+                "sortable": false
+            },
+          ]
+        });
+          
+        var tb_array = [
+          '<div class="btn-group pull-left">',
+          '	<button id="btn_proses" class="btn btn btn-danger" type="button">Rekon</button>',
+          '	<input type="text" id="date_from" class="input-sm" name="date_from" value="${tanggal}">',
+          '	<input type="text" id="date_to" class="input-sm" name="date_to" value="${tanggal}">',
+          '	&nbsp;',
+          '</div>',
+        ];
+
+        var tb = tb_array.join(' ');
+        $("div.toolbar").html(tb);
+        $("div.toolbar").attr('style', 'display:block; float: left; margin-bottom:6px; line-height:16px;');
+        $( "#date_from" ).datepicker({
+          dateFormat:'dd-mm-yy',
+          defaultDate: "+1w",
+          changeMonth: true,
+          changeYear:true,
+          onClose: function( selectedDate ) {
+            $( "#date_to" ).datepicker( "option", "minDate", selectedDate );
+            //oTable.ajaxSource = oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to'+$( "#date_to" ).val();
+            //alert(oTable.ajaxSource); 
+          },
+          onSelect: function(date) {
+                oTable.ajax.url(oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+                oTable.draw();
+          }
+            
+        });
+
+        $( "#date_to" ).datepicker({
+          dateFormat:'dd-mm-yy',
+          defaultDate: "+1w",
+          changeMonth: true,
+          changeYear:true,
+          onClose: function( selectedDate ) {
+            $( "#date_from" ).datepicker( "option", "maxDate", selectedDate );
+            //alert(oTable.ajaxSource); 
+          },
+          onSelect: function(date) {
+                oTable.ajax.url(oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+                oTable.draw();
+          }
+        });
+        
+        
+
+        $('#table1_filter input').unbind();
+        $('#table1_filter input').bind('keyup', function(e) {
+            if(e.keyCode == 13) {
+              oTable.search(this.value).draw();
+          }
+        });
+            
+       $('#btn_proses').click( function() { 
+           oTable.ajax.url('/pbb/rekon/realisasi/pospbb/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           oTable.draw();
+        });         
+      
+    // Handle click on checkbox
+     $('#table1 tbody').on('click', 'input[type="checkbox"]', function(e){
+        var $row = $(this).closest('tr');
+        // Get row data
+        var data = oTable.row($row).data();
+        // Get row ID
+        var rowId = data.id;
+        //alert(rowId);
+        // Determine whether row ID is in the list of selected row IDs 
+        if(this.checked){
+           $row.addClass('selected');
+        } else {
+           $row.removeClass('selected');
+           return;
+        }
+        if (is_alert==true){
+            cfrm = confirm('Proses NOP:'+rowId+'ke SISMIOP?');
+        } else{cfrm = true;}
+        if (cfrm==true)
+        {
+          //e.preventDefault();
+          $.ajax({
+            type: "POST",
+            url: '/pbb/rekon/realisasi/pospbb/update/act',
+            data: {id : rowId},
+            success: function(html){
+                if (parseInt(html.status)==1) {
+                  //$row.remove();
+                }else{
+                    alert(html.message);
+                }
+            }
+          });
+        }
+          
+        // Prevent click event from propagating to parent
+        e.stopPropagation();
+     });
+
+     // Handle click on table cells with checkboxes
+     $('#table1').on('click', 'tbody td, thead th:first-child', function(e){
+        $(this).parent().find('input[type="checkbox"]').trigger('click');
+     });
+
+     // Handle click on "Select all" control
+     $('thead input[name="select_all"]', oTable.table().container()).on('click', function(e){
+        if(this.checked){
+           is_alert=false;
+           $('#table1 tbody input[type="checkbox"]:not(:checked)').trigger('click');
+           is_alert=true;
+        } else {
+           $('#table1 tbody input[type="checkbox"]:checked').trigger('click');
+        }
+
+        // Prevent click event from propagating to parent
+        e.stopPropagation();
+     });
+
+     // Handle table draw event
+     oTable.on('draw', function(){
+        // Update state of "Select all" control
+        updateDataTableSelectAllCtrl(oTable);
+     });
+      
+     // Handle form submission event 
+     $('#frm-example').on('submit', function(e){
+        var form = this;
+
+        // Iterate over all selected checkboxes
+        $.each(rows_selected, function(index, rowId){
+           // Create a hidden element 
+           $(form).append(
+               $('<input>')
+                  .attr('type', 'hidden')
+                  .attr('name', 'id[]')
+                  .val(rowId)
+           );
+        });
+
+        // FOR DEMONSTRATION ONLY     
+        
+        // Output form data to a console     
+        $('#example-console').text($(form).serialize());
+        console.log("Form submission", $(form).serialize());
+         
+        // Remove added elements
+        $('input[name="id\[\]"]', form).remove();
+         
+        // Prevent actual form submission
+        e.preventDefault();
+     });
+
+     $('#posting').click( function() { 
+        if (rows_selected.length==0){
+          alert('Tidak ada baris yang dipilih');
+        }else{
+          $.ajax({
+            type: "GET",
+            url: '<?=base_url()?>pad/jop/posting/'+$('#posted').val(),
+            data: {id : rows_selected.toString()},
+            success: function(html){
+                msg = jQuery.parseJSON(html);
+                alert(msg.message);
+                if (msg.status==1) {
+                  rows_selected = [];
+                  oTable.draw(); 
+                  //oTable.columns(6).search('='+$('#posted').val()).draw();
+                }
+            }
+          });
+        }
+     });
+         
+    });
+//
+// Updates "Select all" control in a data table
+//
+function updateDataTableSelectAllCtrl(table){
+   var $table             = table.table().node();
+   var $chkbox_all        = $('tbody input[type="checkbox"]', $table);
+   var $chkbox_checked    = $('tbody input[type="checkbox"]:checked', $table);
+   var chkbox_select_all  = $('thead input[name="select_all"]', $table).get(0);
+
+   // If none of the checkboxes are checked
+   if($chkbox_checked.length === 0){
+      chkbox_select_all.checked = false;
+      if('indeterminate' in chkbox_select_all){
+         chkbox_select_all.indeterminate = false;
+      }
+
+   // If all of the checkboxes are checked
+   } else if ($chkbox_checked.length === $chkbox_all.length){
+      chkbox_select_all.checked = true;
+      if('indeterminate' in chkbox_select_all){
+         chkbox_select_all.indeterminate = false;
+      }
+
+   // If some of the checkboxes are checked
+   } else {
+      chkbox_select_all.checked = true;
+      if('indeterminate' in chkbox_select_all){
+         chkbox_select_all.indeterminate = true;
+      }
+   }
+}
+    
+    </script>
+    <style>
+    .right{
+        text-align:right;
+      }
+
+    </style>
+    <div class="row">
+    <h3>Rekonsiliasi POSPBB - SISMIOP</h3>
+          <table id="table1" class="table table-bordered table-hover table-condensed">
+            <thead>
+              <tr>
+                <th><input type="checkbox"id="select_all" name="select_all"></th>
+                <th>NOP</th>
+                <th>Tahun</th>
+                <th>Ke</th>
+                <th>Denda</th>
+                <th>Jml. Bayar</th>
+                <th>Tgl. Bayar</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        
+    </div>
+</div>
+
+</html>
+

@@ -1,0 +1,18 @@
+<html metal:use-macro="load: base.pt">
+<div metal:fill-slot="content">
+
+<!-- Main component for a primary marketing message or call to action -->
+<div class="well">
+<h1>openSIPKD Tools</h1>
+<p><img src="/static/img/pyramid.png" class="img-float img-thumbnail"/>
+Selamat Datang <code>openSIPKD</code>, aplikasi dibuat dengan menggunakan
+<a href="http://pylonsproject.org/">Pyramid</a> Web Framework.</p>
+<p>Pilih Module dibawah ini:
+<p>Rekonsiliasi PBB <a href="pbb-rekon">Rekonsiliasi PBB</a>
+<p>Jurnal Pendapatan <a href="jurnal-pendapatan">Jurnal</a>
+<p>PBB P2 <a href="pbb">PBB</a>
+<p>POS PBB P2 <a href="pospbb">POS PBB</a>
+</div><!--well-->
+
+</div>
+</html>

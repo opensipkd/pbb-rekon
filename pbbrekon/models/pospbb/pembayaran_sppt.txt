@@ -1,0 +1,5 @@
+class PosPembayaranSppt(PosPbbBase):
+    __tablename__  = 'pembayaran_sppt'
+    __table_args__ = {'extend_existing':True, 'schema' : pos_schema, 
+                      'autoload':True}
+
