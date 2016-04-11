@@ -15,7 +15,7 @@ from sqlalchemy import engine_from_config
 from ...os_tools import FixLength
 PbbDBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 PbbBase = declarative_base()
-pbb_schema = "BANJAR"
+pbb_schema = "PBB"
 
 NOP = [
     ['kd_propinsi', 2, 'N'],

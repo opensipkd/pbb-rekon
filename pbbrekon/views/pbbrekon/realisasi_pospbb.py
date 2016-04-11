@@ -22,7 +22,7 @@ from ...models.pbb.pembayaran_sppt import (
     )
     
     
-from sqlalchemy import func, String
+from sqlalchemy import func, String, tuple_
 from sqlalchemy.sql.expression import between
 
 from datatables import ColumnDT, DataTables    
@@ -59,7 +59,8 @@ def _DTnumber(chain):
 def view_list(request):
     #rows = DBSession.query(Group).order_by('group_name')
     return dict(module='Rekonsiliasi',
-                tanggal="07-09-2015" #datetime.now()..strftime('%d-%m-%Y')
+                #tanggal="07-09-2015" 
+                tanggal=datetime.now().strftime('%d-%m-%Y')
                 )
 
 def get_columns():
@@ -98,7 +99,7 @@ def view_grid(request):
 
     if url_dict['act'] == 'grid':
         date_from = 'date_from' in req.params and req.params['date_from']\
-                                    or "07-09-2015" #datetime.now().strftime('%d-%m-%Y')
+                                    or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
         date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
         ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
         ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
@@ -130,7 +131,7 @@ def view_grid(request):
                                                 pembayaran_sppt_ke = row.pembayaran_sppt_ke)
             rowPbb = queryPbb.first()
             if not rowPbb:
-                rowNotFound.append("".join([row.kd_propinsi,
+                rowNotFound.append([row.kd_propinsi,
                                          row.kd_dati2,
                                          row.kd_kecamatan,
                                          row.kd_kelurahan,
@@ -138,17 +139,18 @@ def view_grid(request):
                                          row.no_urut, 
                                          row.kd_jns_op,
                                          row.thn_pajak_sppt,
-                                         str(row.pembayaran_sppt_ke)]))
+                                         str(row.pembayaran_sppt_ke)])
         print "**DEBUG** ", rowNotFound
         columns,query = get_columns()
-        qry = query.filter(func.concat(PosPembayaranSppt.kd_propinsi,
+        qry = query.filter(tuple_(PosPembayaranSppt.kd_propinsi,
                                 PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
                                 PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
                                 PosPembayaranSppt.no_urut, PosPembayaranSppt.kd_jns_op, 
-                                PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke.cast(String)).in_(rowNotFound))
+                                PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
                     
         rowTable = DataTables(req.GET, PosPembayaranSppt, qry, columns)
         return rowTable.output_result()
+        
     elif url_dict['act'] == 'update':
         
         bayar.set_raw(req.params['id'])
