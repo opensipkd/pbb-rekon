@@ -25,6 +25,9 @@ import locale
 import pytz
 from pyramid.threadlocal import get_current_registry
 
+import csv
+import io
+import csv, codecs, cStringIO
 
 ################
 # Phone number #
@@ -252,3 +255,167 @@ class Upload(SaveFile):
             output_file.write(data)
         output_file.close()
         return fullpath
+
+################
+# Months #
+################
+BULANS = (
+    ('01', 'Januari'),
+    ('02', 'Februari'),
+    ('03', 'Maret'),
+    ('04', 'April'),
+    ('05', 'Mei'),
+    ('06', 'Juni'),
+    ('07', 'Juli'),
+    ('08', 'Agustus'),
+    ('09', 'September'),
+    ('10', 'Oktober'),
+    ('11', 'November'),
+    ('12', 'Desember'),
+    )
+    
+def get_months(request):
+    return BULANS
+
+def email_validator(node, value):
+    name, email = parseaddr(value)
+    if not email or email.find('@') < 0:
+        raise colander.Invalid(node, 'Invalid email format')    
+        
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        d[column.name] = str(getattr(row, column.name))
+
+    return d        
+    
+    
+def clean(s):
+    r = ''
+    for ch in s:
+        if ch not in string.printable:
+            ch = ''
+        r += ch
+    return r
+
+def xls_reader(filename):    
+    workbook = xlrd.open_workbook(filename)
+    worksheet = workbook.sheet_by_name('potongan')
+    num_rows = worksheet.nrows - 1
+    num_cells = worksheet.ncols - 1
+    curr_row = -1
+    csv = []
+    while curr_row < num_rows:
+        curr_row += 1
+        row = worksheet.row(curr_row)
+        curr_cell = -1
+        txt = []
+        while curr_cell < num_cells:
+            curr_cell += 1
+            # Cell Types: 0=Empty, 1=Text, 2=Number, 3=Date, 4=Boolean, 5=Error, 6=Blank
+            cell_type = worksheet.cell_type(curr_row, curr_cell)
+            cell_value = worksheet.cell_value(curr_row, curr_cell)
+            if cell_type==1 or cell_type==2:
+                try:
+                    cell_value = str(cell_value)
+                except:
+                    cell_value = '0'
+            else:
+                cell_value = clean(cell_value)
+                
+            if curr_cell==0 and cell_value.strip()=="Tanggal":
+                curr_cell=num_cells
+            elif curr_cell==0 and cell_value.strip()=="":
+                curr_cell = num_cells
+                curr_row = num_rows
+            else:
+                txt.append(cell_value)
+        if txt:
+            csv.append(txt)
+    return csv        
+
+
+class UTF8Recoder:
+    """
+    Iterator that reads an encoded stream and reencodes the input to UTF-8
+    """
+    def __init__(self, f, encoding):
+        self.reader = codecs.getreader(encoding)(f)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.reader.next().encode("utf-8")
+
+class UnicodeReader:
+    """
+    A CSV reader which will iterate over lines in the CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        f = UTF8Recoder(f, encoding)
+        self.reader = csv.reader(f, dialect=dialect, **kwds)
+
+    def next(self):
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
+
+    def __iter__(self):
+        return self
+
+class UnicodeWriter:
+    """
+    A CSV writer which will write rows to CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        # Redirect output to a queue
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        self.writer.writerow([s.encode("utf-8") for s in row])
+        # Fetch UTF-8 output from the queue ...
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        # ... and reencode it into the target encoding
+        data = self.encoder.encode(data)
+        # write to the target stream
+        print data
+        self.stream.write(data)
+        # empty queue
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+            
+class CSVRenderer(object):
+   def __init__(self, info):
+      pass
+
+   def __call__(self, value, system):
+      """ Returns a plain CSV-encoded string with content-type
+      ``text/csv``. The content-type may be overridden by
+      setting ``request.response.content_type``."""
+
+      request = system.get('request')
+      if request is not None:
+         response = request.response
+         ct = response.content_type
+         if ct == response.default_content_type:
+            response.content_type = 'text/csv'
+
+      fout = io.BytesIO() #StringIO()
+      fcsv = csv.writer(fout, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+      #fcsv = UnicodeWriter(fout, delimiter=',', quotechar=',', quoting=csv.QUOTE_MINIMAL)
+      #print value.get('header', [])
+      fcsv.writerow(value.get('header', []))
+      fcsv.writerows(value.get('rows', []))
+
+      return fout.getvalue()            

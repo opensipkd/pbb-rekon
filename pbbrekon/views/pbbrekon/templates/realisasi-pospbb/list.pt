@@ -85,8 +85,10 @@
         var tb_array = [
           '<div class="btn-group pull-left">',
           '	<button id="btn_proses" class="btn btn btn-danger" type="button">Rekon</button>',
-          '	<input type="text" id="date_from" class="input-sm" name="date_from" value="${tanggal}">',
+          '	&nbsp;Periode <input type="text" id="date_from" class="input-sm" name="date_from" value="${tanggal}">',
           '	<input type="text" id="date_to" class="input-sm" name="date_to" value="${tanggal}">',
+          '	<button id="csv_transaksi" class="btn btn btn-primary" type="button">CSV Transaksi</button>',
+          '	<button id="csv_rekon" class="btn btn btn-warning" type="button">CSV Rekon</button>',
           '	&nbsp;',
           '</div>',
         ];
@@ -139,7 +141,15 @@
            oTable.ajax.url('/pbb/rekon/realisasi/pospbb/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
            oTable.draw();
         });         
-      
+
+       $('#csv_rekon').click( function() { 
+           window.open('/pbb/rekon/realisasi/pospbb/rekon/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+        }); 
+       
+        $('#csv_transaksi').click( function() { 
+           window.open('/pbb/rekon/realisasi/pospbb/transaksi/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+        }); 
+        
     // Handle click on checkbox
      $('#table1 tbody').on('click', 'input[type="checkbox"]', function(e){
         var $row = $(this).closest('tr');

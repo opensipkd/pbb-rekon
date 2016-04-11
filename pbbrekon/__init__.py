@@ -39,8 +39,6 @@ from tools import (
     split,
     )
 
-
-
 # http://stackoverflow.com/questions/9845669/pyramid-inverse-to-add-notfound-viewappend-slash-true    
 class RemoveSlashNotFoundViewFactory(object):
     def __init__(self, notfound_view=None):
@@ -103,11 +101,21 @@ routes = [
     ('group-add', '/group/add', 'Add user group'),
     ('group-edit', '/group/{id}/edit', 'Edit user group'),
     ('group-delete', '/group/{id}/delete', 'Delete user group'),  
+    
     ('pbb-rekon', '/pbb/rekon', 'Rekonsiliasi PBB'),  
     ('pbb-rekon-realisasi-pospbb', '/pbb/rekon/realisasi/pospbb', 'Rekonsiliasi Realisasi POSPBB'),  
     ('pbb-rekon-realisasi-pospbb-act', '/pbb/rekon/realisasi/pospbb/{act}/act', 'Action Rekonsiliasi Realisasi POSPBB'),  
+    ('pbb-rekon-realisasi-pospbb-csv', '/pbb/rekon/realisasi/pospbb/{csv}/csv', 'CSV Rekonsiliasi Realisasi POSPBB'),  
     ('pbb-rekon-realisasi-sismiop', '/pbb/rekon/realisasi/sismiop', 'Rekonsiliasi Realisasi SISMIOP'),  
     ('pbb-rekon-realisasi-sismiop-act', '/pbb/rekon/realisasi/sismiop/{act}/act', 'Action Rekonsiliasi Realisasi SISMIOP'),  
+    ('pbb-rekon-realisasi-sismiop-csv', '/pbb/rekon/realisasi/sismiop/{csv}/csv', 'CSV Rekonsiliasi Realisasi SISMIOP'),  
+
+    ('pbb-rekon-sppt-pospbb', '/pbb/rekon/sppt/pospbb', 'Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-sppt-pospbb-act', '/pbb/rekon/sppt/pospbb/{act}/act', 'Action Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-sppt-pospbb-csv', '/pbb/rekon/sppt/pospbb/{csv}/csv', 'CSV Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-sppt-sismiop', '/pbb/rekon/sppt/sismiop', 'Rekonsiliasi Ketetapan SISMIOP'),  
+    ('pbb-rekon-sppt-sismiop-act', '/pbb/rekon/sppt/sismiop/{act}/act', 'Action Rekonsiliasi Ketetapan SISMIOP'),  
+    ('pbb-rekon-sppt-sismiop-csv', '/pbb/rekon/sppt/sismiop/{csv}/csv', 'CSV Rekonsiliasi Ketetapan SISMIOP'),  
     
     ]
 
@@ -174,6 +182,9 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('deform_static', 'deform:static')
     config.add_static_view('files', settings['static_files'])    
+
+    config.add_renderer('csv', '.tools.CSVRenderer')
+    
     for name, path, title in routes:
         config.add_route(name, path)
     config.scan()

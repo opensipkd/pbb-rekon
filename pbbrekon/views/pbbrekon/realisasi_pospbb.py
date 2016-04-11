@@ -85,7 +85,10 @@ def get_columns():
                          PosPembayaranSppt.denda_sppt, PosPembayaranSppt.jml_sppt_yg_dibayar,
                          PosPembayaranSppt.tgl_pembayaran_sppt)    
     return columns, query
-    
+
+########                    
+# ACT #
+########      
 @view_config(route_name='pbb-rekon-realisasi-pospbb-act', renderer='json')
 def view_grid(request):
     req = request
@@ -96,24 +99,19 @@ def view_grid(request):
         # url = self.request.resource_url(self.context, '')
         # self.d['msg'] = ""
         # return self.d
+    date_from = 'date_from' in req.params and req.params['date_from']\
+                                or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
+    date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
+    ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
+    ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
 
     if url_dict['act'] == 'grid':
-        date_from = 'date_from' in req.params and req.params['date_from']\
-                                    or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
-        date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
-        ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
-        ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
         columns, query = get_columns()
         qry = query.filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rowTable = DataTables(req.GET, PosPembayaranSppt, qry, columns)
         return rowTable.output_result()
 
     elif url_dict['act'] == 'rekon':
-        date_from = 'date_from' in req.params and req.params['date_from'] or datetime.now().strftime('%d-%m-%Y')
-        date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
-        ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
-        ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
-        
         query = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
                          PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
                          PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
@@ -121,9 +119,6 @@ def view_grid(request):
                          PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).\
                     filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rows = query.all()
-        # listRows = []
-        # for row in rows:
-            # listRows.append(list(row))
     
         queryPbb = PbbDBSession.query(PembayaranSppt.kd_propinsi,
                                     PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
@@ -131,13 +126,6 @@ def view_grid(request):
                                     PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
                                     PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).\
                     filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
-                    
-                    # .\
-                          # filter(tuple_(PembayaranSppt.kd_propinsi,
-                                    # PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
-                                    # PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
-                                    # PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
-                                    # PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).in_(rows))
         rowPbbs = queryPbb.all()
         rowNotFound = []
         if len(rows) != len(rowPbbs):
@@ -155,9 +143,7 @@ def view_grid(request):
         return rowTable.output_result()
         
     elif url_dict['act'] == 'update':
-        
         bayar.set_raw(req.params['id'])
-        
         query = PosPbbDBSession.query(PosPembayaranSppt).\
                     filter_by(kd_propinsi     = bayar['kd_propinsi'],
                               kd_dati2        = bayar['kd_dati2'],
@@ -187,9 +173,93 @@ def view_grid(request):
             rowPbb.jml_sppt_yg_dibayar = row.jml_sppt_yg_dibayar
             rowPbb.tgl_pembayaran_sppt = row.tgl_pembayaran_sppt
             rowPbb.nip_rekam_byr_sppt = unicode(row.nip_rekam_byr_sppt)
-            #try:
-            PbbDBSession.add(rowPbb)
-            PbbDBSession.flush()
-            #except:
-            #    return dict(status=0,message='Gagal %s' %bayar.get_raw())
+            try:
+                PbbDBSession.add(rowPbb)
+                PbbDBSession.flush()
+            except:
+                return dict(status=0,message='Gagal %s' %bayar.get_raw())
         return dict(status=1,message='Sukses')                
+
+########                    
+# CSV #
+########          
+@view_config(route_name='pbb-rekon-realisasi-pospbb-csv', renderer='csv')
+def view_csv(request):
+    req = request
+    ses = req.session
+    params = req.params
+    url_dict = req.matchdict 
+    # if not 'logged' in ses or   not ses['logged'] or ses['userid']!='sa':
+        # url = self.request.resource_url(self.context, '')
+        # self.d['msg'] = ""
+        # return self.d
+        
+    date_from = 'date_from' in req.params and req.params['date_from']\
+                                or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
+    date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
+    ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
+    ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
+    if url_dict['csv'] == 'rekon':
+        query = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
+                         PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
+                         PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
+                         PosPembayaranSppt.no_urut, PosPembayaranSppt.kd_jns_op, 
+                         PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).\
+                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        rows = query.all()
+
+        queryPbb = PbbDBSession.query(PembayaranSppt.kd_propinsi,
+                                    PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
+                                    PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
+                                    PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
+                                    PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).\
+                    filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+                    
+        rowPbbs = queryPbb.all()
+        rowNotFound = []
+        if len(rows) != len(rowPbbs):
+            rowNotFound = list(set(rows) - set(rowPbbs))
+        
+        columns,query = get_columns()
+        qry = query.filter(tuple_(PosPembayaranSppt.kd_propinsi,
+                                PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
+                                PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
+                                PosPembayaranSppt.no_urut, PosPembayaranSppt.kd_jns_op, 
+                                PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
+        
+        r = qry.first()
+        header = r.keys()
+        query = qry.all()
+        rows = []
+        for item in query:
+            rows.append(list(item))
+
+
+        # override attributes of response
+        filename = 'rekon%s%s.csv' %(date_from, date_to)
+        self.request.response.content_disposition = 'attachment;filename=' + filename
+
+        return {
+          'header': header,
+          'rows': rows,
+        }        
+        
+    elif url_dict['csv'] == 'transaksi':
+        columns, query = get_columns()
+        qry = query.filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        r = qry.first()
+        header = r.keys()
+        query = qry.all()
+        rows = []
+        for item in query:
+            rows.append(list(item))
+
+        # override attributes of response
+        filename = 'transaksi%s%s.csv' %(date_from, date_to)
+        req.response.content_disposition = 'attachment;filename=' + filename
+
+        return {
+          'header': header,
+          'rows': rows,
+        }        
+        
