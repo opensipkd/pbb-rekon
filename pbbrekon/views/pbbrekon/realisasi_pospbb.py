@@ -114,33 +114,33 @@ def view_grid(request):
         ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
         ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
         
-        query = PosPbbDBSession.query(PosPembayaranSppt).\
+        query = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
+                         PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
+                         PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
+                         PosPembayaranSppt.no_urut, PosPembayaranSppt.kd_jns_op, 
+                         PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).\
                     filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rows = query.all()
+        # listRows = []
+        # for row in rows:
+            # listRows.append(list(row))
+    
+        queryPbb = PbbDBSession.query(PembayaranSppt.kd_propinsi,
+                                    PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
+                                    PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
+                                    PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
+                                    PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).\
+                          filter(tuple_(PembayaranSppt.kd_propinsi,
+                                    PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
+                                    PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
+                                    PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
+                                    PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).in_(rows))
+        rowPbbs = queryPbb.all()
         rowNotFound = []
-        for row in rows:
-            queryPbb = PbbDBSession.query(PembayaranSppt).\
-                                      filter_by(kd_propinsi  = row.kd_propinsi,
-                                                kd_dati2     = row.kd_dati2,
-                                                kd_kecamatan = row.kd_kecamatan,
-                                                kd_kelurahan = row.kd_kelurahan,
-                                                kd_blok      = row.kd_blok,
-                                                no_urut      = row.no_urut, 
-                                                kd_jns_op    = row.kd_jns_op, 
-                                                thn_pajak_sppt = row.thn_pajak_sppt,
-                                                pembayaran_sppt_ke = row.pembayaran_sppt_ke)
-            rowPbb = queryPbb.first()
-            if not rowPbb:
-                rowNotFound.append([row.kd_propinsi,
-                                         row.kd_dati2,
-                                         row.kd_kecamatan,
-                                         row.kd_kelurahan,
-                                         row.kd_blok,
-                                         row.no_urut, 
-                                         row.kd_jns_op,
-                                         row.thn_pajak_sppt,
-                                         str(row.pembayaran_sppt_ke)])
-        print "**DEBUG** ", rowNotFound
+        if len(rows) != len(rowPbbs):
+            rowNotFound = list(set(rows) - set(rowPbbs))
+        #print "**DEBUG**", len(rows), len(rowPbbs)
+        
         columns,query = get_columns()
         qry = query.filter(tuple_(PosPembayaranSppt.kd_propinsi,
                                 PosPembayaranSppt.kd_dati2,PosPembayaranSppt.kd_kecamatan,
@@ -167,26 +167,26 @@ def view_grid(request):
                               pembayaran_sppt_ke = bayar['pembayaran_sppt_ke'])
         row = query.first()
         if row:
-          rowPbb = PembayaranSppt()
-          rowPbb.kd_propinsi  = unicode(row.kd_propinsi)
-          rowPbb.kd_dati2     = unicode(row.kd_dati2)
-          rowPbb.kd_kecamatan = unicode(row.kd_kecamatan)
-          rowPbb.kd_kelurahan = unicode(row.kd_kelurahan)
-          rowPbb.kd_blok      = unicode(row.kd_blok)
-          rowPbb.no_urut      = unicode(row.no_urut) 
-          rowPbb.kd_jns_op    = unicode(row.kd_jns_op)
-          rowPbb.thn_pajak_sppt = unicode(row.thn_pajak_sppt)
-          rowPbb.pembayaran_sppt_ke = row.pembayaran_sppt_ke
-          rowPbb.kd_kantor = unicode(row.kd_kantor)
-          rowPbb.kd_kanwil = unicode(row.kd_kanwil)
-          rowPbb.kd_tp = unicode(row.kd_tp)
-          rowPbb.denda_sppt = row.denda_sppt
-          rowPbb.jml_sppt_yg_dibayar = row.jml_sppt_yg_dibayar
-          rowPbb.tgl_pembayaran_sppt = row.tgl_pembayaran_sppt
-          rowPbb.nip_rekam_byr_sppt = unicode(row.nip_rekam_byr_sppt)
-          try:
-              PbbDBSession.add(rowPbb)
-              PbbDBSession.flush()
-          except:
-              return dict(status=0,message='Gagal %s' %bayar.get_raw())
+            rowPbb = PembayaranSppt()
+            rowPbb.kd_propinsi  = unicode(row.kd_propinsi)
+            rowPbb.kd_dati2     = unicode(row.kd_dati2)
+            rowPbb.kd_kecamatan = unicode(row.kd_kecamatan)
+            rowPbb.kd_kelurahan = unicode(row.kd_kelurahan)
+            rowPbb.kd_blok      = unicode(row.kd_blok)
+            rowPbb.no_urut      = unicode(row.no_urut) 
+            rowPbb.kd_jns_op    = unicode(row.kd_jns_op)
+            rowPbb.thn_pajak_sppt = unicode(row.thn_pajak_sppt)
+            rowPbb.pembayaran_sppt_ke = row.pembayaran_sppt_ke
+            rowPbb.kd_kantor = unicode(row.kd_kantor)
+            rowPbb.kd_kanwil = unicode(row.kd_kanwil)
+            rowPbb.kd_tp = unicode(row.kd_tp)
+            rowPbb.denda_sppt = row.denda_sppt
+            rowPbb.jml_sppt_yg_dibayar = row.jml_sppt_yg_dibayar
+            rowPbb.tgl_pembayaran_sppt = row.tgl_pembayaran_sppt
+            rowPbb.nip_rekam_byr_sppt = unicode(row.nip_rekam_byr_sppt)
+            #try:
+            PbbDBSession.add(rowPbb)
+            PbbDBSession.flush()
+            #except:
+            #    return dict(status=0,message='Gagal %s' %bayar.get_raw())
         return dict(status=1,message='Sukses')                

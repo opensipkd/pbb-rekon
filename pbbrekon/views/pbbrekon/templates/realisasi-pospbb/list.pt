@@ -74,10 +74,7 @@
                     ],
           columnDefs: [
             {
-                "targets": [ 0 ],
-                "searchable": false
-            },{
-                "targets": [ 1 ],
+                "targets": [ 0,1 ],
                 "visible": true,
                 "searchable": false,
                 "sortable": false
@@ -103,11 +100,11 @@
           changeMonth: true,
           changeYear:true,
           onClose: function( selectedDate ) {
-            $( "#date_to" ).datepicker( "option", "minDate", selectedDate );
             //oTable.ajaxSource = oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to'+$( "#date_to" ).val();
             //alert(oTable.ajaxSource); 
           },
-          onSelect: function(date) {
+          onSelect: function(selectedDate) {
+            $( "#date_to" ).datepicker( "option", "minDate", selectedDate );
                 oTable.ajax.url(oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
                 oTable.draw();
           }
@@ -120,10 +117,10 @@
           changeMonth: true,
           changeYear:true,
           onClose: function( selectedDate ) {
-            $( "#date_from" ).datepicker( "option", "maxDate", selectedDate );
             //alert(oTable.ajaxSource); 
           },
-          onSelect: function(date) {
+          onSelect: function(selectedDate) {
+                $( "#date_from" ).datepicker( "option", "maxDate", selectedDate );
                 oTable.ajax.url(oTableUrl + '?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
                 oTable.draw();
           }
