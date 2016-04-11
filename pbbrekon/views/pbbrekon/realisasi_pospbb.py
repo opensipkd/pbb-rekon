@@ -130,11 +130,14 @@ def view_grid(request):
                                     PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
                                     PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
                                     PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).\
-                          filter(tuple_(PembayaranSppt.kd_propinsi,
-                                    PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
-                                    PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
-                                    PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
-                                    PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).in_(rows))
+                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+                    
+                    # .\
+                          # filter(tuple_(PembayaranSppt.kd_propinsi,
+                                    # PembayaranSppt.kd_dati2,PembayaranSppt.kd_kecamatan,
+                                    # PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
+                                    # PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
+                                    # PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).in_(rows))
         rowPbbs = queryPbb.all()
         rowNotFound = []
         if len(rows) != len(rowPbbs):
