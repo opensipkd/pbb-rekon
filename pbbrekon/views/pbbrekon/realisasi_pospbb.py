@@ -130,7 +130,7 @@ def view_grid(request):
                                     PembayaranSppt.kd_kelurahan,PembayaranSppt.kd_blok,
                                     PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op, 
                                     PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke).\
-                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+                    filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
                     
                     # .\
                           # filter(tuple_(PembayaranSppt.kd_propinsi,
