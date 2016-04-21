@@ -138,7 +138,9 @@ def view_grid(request):
                                 PosPembayaranSppt.kd_kelurahan,PosPembayaranSppt.kd_blok,
                                 PosPembayaranSppt.no_urut, PosPembayaranSppt.kd_jns_op, 
                                 PosPembayaranSppt.thn_pajak_sppt, PosPembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound),
-                                PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+                                PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to),
+                                PosPembayaranSppt.jml_sppt_yg_dibayar>0,
+                                )
                     
         rowTable = DataTables(req.GET, PosPembayaranSppt, qry, columns)
         return rowTable.output_result()
