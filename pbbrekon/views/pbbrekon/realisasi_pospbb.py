@@ -176,7 +176,9 @@ def view_grid(request):
             try:
                 PbbDBSession.add(rowPbb)
                 PbbDBSession.flush()
+                
             except:
+                PbbDBSession.rollback()
                 return dict(status=0,message='Gagal %s' %bayar.get_raw())
         return dict(status=1,message='Sukses')                
 
