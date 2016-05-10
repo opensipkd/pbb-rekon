@@ -7,7 +7,7 @@
       var rows_selected = [];
       var is_alert = true;
 
-      var oTableUrl = "/pbb/rekon/realisasi/pospbb/grid/act";
+      var oTableUrl = "/pbb/rekon/realisasi/sismiop/grid/act";
       $.fn.dataTable.ext.search.push(
           function( oSettings, aData, iDataIndex ) {
               var iFini = document.getElementById('date_from').value;
@@ -138,16 +138,16 @@
         });
             
        $('#btn_proses').click( function() { 
-           oTable.ajax.url('/pbb/rekon/realisasi/pospbb/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           oTable.ajax.url('/pbb/rekon/realisasi/sismiop/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
            oTable.draw();
         });         
 
        $('#csv_rekon').click( function() { 
-           window.open('/pbb/rekon/realisasi/pospbb/rekon/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           window.open('/pbb/rekon/realisasi/sismiop/rekon/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
         }); 
        
         $('#csv_transaksi').click( function() { 
-           window.open('/pbb/rekon/realisasi/pospbb/transaksi/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           window.open('/pbb/rekon/realisasi/sismiop/transaksi/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
         }); 
         
     // Handle click on checkbox
@@ -166,14 +166,14 @@
            return;
         }
         if (is_alert==true){
-            cfrm = confirm('Proses NOP : '+rowId+' ke SISMIOP?');
+            cfrm = confirm('Proses NOP : '+rowId+' ke POSPBB?');
         } else{cfrm = true;}
         if (cfrm==true)
         {
           //e.preventDefault();
           $.ajax({
             type: "POST",
-            url: '/pbb/rekon/realisasi/pospbb/update/act',
+            url: '/pbb/rekon/realisasi/sismiop/update/act',
             data: {id : rowId},
             success: function(html){
                 if (parseInt(html.status)==1) {
@@ -304,7 +304,7 @@ function updateDataTableSelectAllCtrl(table){
 
     </style>
     <div class="row">
-    <h3>Rekonsiliasi POSPBB - SISMIOP</h3>
+    <h3>Rekonsiliasi SISMIOP - POSPBB</h3>
           <table id="table1" class="table table-bordered table-hover table-condensed">
             <thead>
               <tr>

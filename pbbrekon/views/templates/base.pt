@@ -41,7 +41,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li tal:condition="has_permission(request, 'edit_user')"><a href="/user">User</a></li>                
-                <li tal:condition="has_permission(request, 'edit_group')"><a href="/group">User group</a></li>                
+                <li tal:condition="has_permission(request, 'edit_group')"><a href="/group">Group</a></li>                
               </ul>
             </li>
             

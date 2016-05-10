@@ -6,7 +6,7 @@
         <h3 class="panel-title">Warning</h3>
     </div>
     <div class="panel-body">
-        Delete user ID #${row.id} ${row.email} ?
+        Hapus user ID #${row.id} ${row.email} ${row.user_name} ?
     </div>
 </div>
 

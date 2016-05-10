@@ -7,7 +7,7 @@
       var rows_selected = [];
       var is_alert = true;
 
-      var oTableUrl = "/pbb/rekon/realisasi/pospbb/grid/act";
+      var oTableUrl = "/pbb/rekon/ketetapan/pospbb/grid/act";
       $.fn.dataTable.ext.search.push(
           function( oSettings, aData, iDataIndex ) {
               var iFini = document.getElementById('date_from').value;
@@ -55,7 +55,7 @@
           "paginate": true,
           "searching": true,
           "paginationType": "full_numbers",
-          "order":[[6,'asc']],
+          "order":[[4,'asc']],
           "lengthMenu": [
               [10, 25, 50, 100, -1],
               [10, 25, 50, 100, "All"]
@@ -66,10 +66,9 @@
                        }},
                      {data: "nop"},
                      {data: "thn_pajak_sppt"},
-                     {data: "pembayaran_sppt_ke"},
-                     {data: "denda_sppt", sClass: "right"},
-                     {data: "jml_sppt_yg_dibayar", sClass: "right"},
-                     {data: "tgl_pembayaran_sppt"},
+                     {data: "pbb_yg_harus_dibayar_sppt", sClass: "right"},
+                     {data: "tgl_cetak_sppt"},
+                     {data: "status_pembayaran_sppt", sClass: "center"},
                      
                     ],
           columnDefs: [
@@ -138,16 +137,16 @@
         });
             
        $('#btn_proses').click( function() { 
-           oTable.ajax.url('/pbb/rekon/realisasi/pospbb/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           oTable.ajax.url('/pbb/rekon/ketetapan/pospbb/rekon/act?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
            oTable.draw();
         });         
 
        $('#csv_rekon').click( function() { 
-           window.open('/pbb/rekon/realisasi/pospbb/rekon/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           window.open('/pbb/rekon/ketetapan/pospbb/rekon/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
         }); 
        
         $('#csv_transaksi').click( function() { 
-           window.open('/pbb/rekon/realisasi/pospbb/transaksi/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
+           window.open('/pbb/rekon/ketetapan/pospbb/transaksi/csv?date_from='+$( "#date_from" ).val()+'&date_to='+$( "#date_to" ).val());
         }); 
         
     // Handle click on checkbox
@@ -173,7 +172,7 @@
           //e.preventDefault();
           $.ajax({
             type: "POST",
-            url: '/pbb/rekon/realisasi/pospbb/update/act',
+            url: '/pbb/rekon/ketetapan/pospbb/update/act',
             data: {id : rowId},
             success: function(html){
                 if (parseInt(html.status)==1) {
@@ -304,17 +303,16 @@ function updateDataTableSelectAllCtrl(table){
 
     </style>
     <div class="row">
-    <h3>Rekonsiliasi POSPBB - SISMIOP</h3>
+    <h3>Ketetapan POSPBB - SISMIOP</h3>
           <table id="table1" class="table table-bordered table-hover table-condensed">
             <thead>
               <tr>
                 <th><input type="checkbox"id="select_all" name="select_all"></th>
                 <th>NOP</th>
                 <th>Tahun</th>
-                <th>Ke</th>
-                <th>Denda</th>
                 <th>Jml. Bayar</th>
-                <th>Tgl. Bayar</th>
+                <th>Tgl. Cetak</th>
+                <th>Status Bayar</th>
               </tr>
             </thead>
             <tbody>

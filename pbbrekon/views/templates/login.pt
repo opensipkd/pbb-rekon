@@ -21,11 +21,27 @@
 
   <body>
 
-    <div class="container">
-      
-      <div tal:content="structure form"/>
-
-    </div> <!-- /container -->
+  <form id="deform" method="POST" enctype="multipart/form-data" accept-charset="utf-8"
+        class="panel form-signin">
+    <fieldset class="deformFormFieldset">
+      <input type="hidden" name="_charset_" />
+      <input type="hidden" name="__formid__" value="deform"/>
+      <div class="form-group">
+        <div tal:condition="'id' in form">
+          <div tal:define="field form['id']">
+            ${structure:field.serialize()}
+          </div>
+        </div> 
+        <h2 class="form-signin-heading"><center>OpenSIPKD PBB-Rekon</center></h2>
+        <!--username -------------------------------> 
+        <input id="username" class="form-control" type="text" value="" name="username" placeholder="Username">
+        <!--password ------------------------------->
+        <input id="password" class="form-control" type="password" value="" name="password" placeholder="Password">
+        <button id="deformsave" name="login" type="submit" class="btn btn-lg btn-primary btn-block" value="login">Login</button>
+          
+      </div>
+    </fieldset>
+  </form>
 
 
     <!-- Bootstrap core JavaScript

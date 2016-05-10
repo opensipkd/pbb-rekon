@@ -6,7 +6,7 @@
         <h3 class="panel-title">Warning</h3>
     </div>
     <div class="panel-body">
-        Delete user group ID #${row.id} ${row.group_name} ?
+        Hapus group ID #${row.id} ${row.group_name} ?
     </div>
 </div>
 

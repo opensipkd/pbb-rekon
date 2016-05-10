@@ -102,21 +102,24 @@ STATUS = (
 
 
 class AddSchema(colander.Schema):
-    email = colander.SchemaNode(colander.String(),
-                                validator=email_validator)
+    email     = colander.SchemaNode(
+                    colander.String(),
+                    validator=email_validator)
     user_name = colander.SchemaNode(
                     colander.String(),
-                    missing=colander.drop)
-    status = colander.SchemaNode(
-                    colander.String(),
-                    widget=deferred_status)
-    password = colander.SchemaNode(
+                    missing=colander.drop,
+                    title = "Nama User")
+    password  = colander.SchemaNode(
                     colander.String(),
                     widget=widget.PasswordWidget(),
                     missing=colander.drop)
-    group = colander.SchemaNode(colander.String(),
-                validator=group_validator,
-                description='More than one separated by commas.')
+    status    = colander.SchemaNode(
+                    colander.String(),
+                    widget=deferred_status)
+    group     = colander.SchemaNode(colander.String(),
+                    validator=group_validator,
+                    #description='More than one separated by commas.')
+                    description='Jika lebih dari satu dipisahkan dengan koma.')
 
 
 class EditSchema(AddSchema):
@@ -129,7 +132,7 @@ def get_form(request, class_form):
     schema = class_form(validator=form_validator)
     schema = schema.bind(status_list=STATUS)
     schema.request = request
-    return Form(schema, buttons=('save','cancel'))
+    return Form(schema, buttons=('simpan','batal'))
     
 def save(values, user, row=None):
     if not row:
@@ -164,8 +167,8 @@ def save_request(values, request, row=None):
     if 'id' in request.matchdict:
         values['id'] = request.matchdict['id']
     row = save(values, request.user, row)
-    request.session.flash('User {email} has been saved.'.format(
-        email=row.email))
+    request.session.flash('User {email} {user_name} berhasil disimpan.'.format(
+        email=row.email, user_name=row.user_name))
         
 def route_list(request):
     return HTTPFound(location=request.route_url('user'))
@@ -180,7 +183,7 @@ def session_failed(request, session_name):
 def view_add(request):
     form = get_form(request, AddSchema)
     if request.POST:
-        if 'save' in request.POST:
+        if 'simpan' in request.POST:
             controls = request.POST.items()
             try:
                 c = form.validate(controls)
@@ -232,7 +235,7 @@ def view_edit(request):
         return id_not_found(request)
     form = get_form(request, EditSchema)
     if request.POST:
-        if 'save' in request.POST:
+        if 'simpan' in request.POST:
             controls = request.POST.items()
             try:
                 c = form.validate(controls)
@@ -258,11 +261,11 @@ def view_delete(request):
     row = q.first()
     if not row:
         return id_not_found(request)
-    form = Form(colander.Schema(), buttons=('delete','cancel'))
+    form = Form(colander.Schema(), buttons=('hapus','batal'))
     if request.POST:
-        if 'delete' in request.POST:
-            msg = 'User ID {user_id} {email} has been deleted.'.format(
-                user_id=row.id, email=row.email)
+        if 'hapus' in request.POST:
+            msg = 'User ID {user_id} {email} {user_name} berhasil dihapus.'.format(
+                user_id=row.id, email=row.email, user_name=row.user_name)
             q.delete()
             DBSession.flush()
             request.session.flash(msg)

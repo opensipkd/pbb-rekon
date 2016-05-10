@@ -110,12 +110,12 @@ routes = [
     ('pbb-rekon-realisasi-sismiop-act', '/pbb/rekon/realisasi/sismiop/{act}/act', 'Action Rekonsiliasi Realisasi SISMIOP'),  
     ('pbb-rekon-realisasi-sismiop-csv', '/pbb/rekon/realisasi/sismiop/{csv}/csv', 'CSV Rekonsiliasi Realisasi SISMIOP'),  
 
-    ('pbb-rekon-sppt-pospbb', '/pbb/rekon/sppt/pospbb', 'Rekonsiliasi Ketetapan POSPBB'),  
-    ('pbb-rekon-sppt-pospbb-act', '/pbb/rekon/sppt/pospbb/{act}/act', 'Action Rekonsiliasi Ketetapan POSPBB'),  
-    ('pbb-rekon-sppt-pospbb-csv', '/pbb/rekon/sppt/pospbb/{csv}/csv', 'CSV Rekonsiliasi Ketetapan POSPBB'),  
-    ('pbb-rekon-sppt-sismiop', '/pbb/rekon/sppt/sismiop', 'Rekonsiliasi Ketetapan SISMIOP'),  
-    ('pbb-rekon-sppt-sismiop-act', '/pbb/rekon/sppt/sismiop/{act}/act', 'Action Rekonsiliasi Ketetapan SISMIOP'),  
-    ('pbb-rekon-sppt-sismiop-csv', '/pbb/rekon/sppt/sismiop/{csv}/csv', 'CSV Rekonsiliasi Ketetapan SISMIOP'),  
+    ('pbb-rekon-ketetapan-pospbb', '/pbb/rekon/ketetapan/pospbb', 'Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-ketetapan-pospbb-act', '/pbb/rekon/ketetapan/pospbb/{act}/act', 'Action Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-ketetapan-pospbb-csv', '/pbb/rekon/ketetapan/pospbb/{csv}/csv', 'CSV Rekonsiliasi Ketetapan POSPBB'),  
+    ('pbb-rekon-ketetapan-sismiop', '/pbb/rekon/ketetapan/sismiop', 'Rekonsiliasi Ketetapan SISMIOP'),  
+    ('pbb-rekon-ketetapan-sismiop-act', '/pbb/rekon/ketetapan/sismiop/{act}/act', 'Action Rekonsiliasi Ketetapan SISMIOP'),  
+    ('pbb-rekon-ketetapan-sismiop-csv', '/pbb/rekon/ketetapan/sismiop/{csv}/csv', 'CSV Rekonsiliasi Ketetapan SISMIOP'),  
     
     ]
 

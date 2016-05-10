@@ -35,9 +35,11 @@ def view_home(request):
 # Login #
 #########
 class Login(colander.Schema):
-    username = colander.SchemaNode(colander.String())
+    username = colander.SchemaNode(colander.String(),
+                                   oid='username')
     password = colander.SchemaNode(colander.String(),
-                    widget=widget.PasswordWidget())
+                                   widget=widget.PasswordWidget(),
+                                   oid='password')
 
 
 # http://deformdemo.repoze.org/interfield/
@@ -72,7 +74,7 @@ def view_login(request):
         try:
             c = form.validate(controls)
         except ValidationFailure, e:
-            request.session['login failed'] = e.render()
+            #request.session['login failed'] = e.render()
             return HTTPFound(location=request.route_url('login'))
         headers = get_login_headers(request, user)        
         return HTTPFound(location=request.route_url('home'),
@@ -81,7 +83,8 @@ def view_login(request):
         r = dict(form=request.session['login failed'])
         del request.session['login failed']
         return r
-    return dict(form=form.render())
+    return dict(form=form)
+    #return dict(form=form.render())
 
 @view_config(route_name='logout')
 def view_logout(request):
@@ -94,10 +97,10 @@ def view_logout(request):
 # Change password #
 ###################
 class Password(colander.Schema):
-    old_password = colander.SchemaNode(colander.String(),
-                                       widget=widget.PasswordWidget())
-    new_password = colander.SchemaNode(colander.String(),
-                                       widget=widget.PasswordWidget())
+    old_password    = colander.SchemaNode(colander.String(),
+                                          widget=widget.PasswordWidget())
+    new_password    = colander.SchemaNode(colander.String(),
+                                          widget=widget.PasswordWidget())
     retype_password = colander.SchemaNode(colander.String(),
                                           widget=widget.PasswordWidget())
 

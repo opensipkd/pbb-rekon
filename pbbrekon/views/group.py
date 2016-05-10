@@ -53,15 +53,21 @@ def form_validator(form, value):
 
 
 PERMS = ['edit_user', 'edit_group']
-PERMISSIONS_DESC = 'Available is {perms}.'.format(perms=', '.join(PERMS))
+PERMISSIONS_DESC = 'Jika lebih dari satu dipisahkan dengan koma. Yang tersedia adalah {perms}.'.format(perms=', '.join(PERMS))
+#PERMISSIONS_DESC = 'Available is {perms}.'.format(perms=', '.join(PERMS))
 
 class AddSchema(colander.Schema):
-    group_name = colander.SchemaNode(colander.String())
+    group_name  = colander.SchemaNode(
+                    colander.String(),
+                    title = "Nama Group")
     description = colander.SchemaNode(
                     colander.String(),
+                    title = "Deskripsi",
                     missing=colander.drop,
                     widget=widget.TextAreaWidget(rows=5))
-    permissions = colander.SchemaNode(colander.String(),
+    permissions = colander.SchemaNode(
+                    colander.String(),
+                    title = "Hak Akses",
                     description=PERMISSIONS_DESC)                    
 
 
@@ -74,7 +80,7 @@ class EditSchema(AddSchema):
 def get_form(request, class_form):
     schema = class_form(validator=form_validator)
     schema.request = request
-    return Form(schema, buttons=('save', 'cancel'))
+    return Form(schema, buttons=('simpan', 'batal'))
        
 def save(values, row=None):
     if not row:
@@ -83,6 +89,7 @@ def save(values, row=None):
     row.description = values['description']
     DBSession.add(row)
     DBSession.flush()
+    
     old_perms = get_group_perm_names(row.id)
     new_perms = []
     for perm_name in values['permissions'].split(','):
@@ -107,7 +114,7 @@ def save_request(values, request, row=None):
     if 'id' in request.matchdict:
         values['id'] = request.matchdict['id']
     row = save(values, row)
-    msg = 'Group {name} has been saved.'.format(name=row.group_name)
+    msg = 'Group {name} berhasil disimpan.'.format(name=row.group_name)
     request.session.flash(msg)
         
 def route_list(request):
@@ -123,7 +130,7 @@ def session_failed(request, session_name):
 def view_add(request):
     form = get_form(request, AddSchema)
     if request.POST:
-        if 'save' in request.POST:
+        if 'simpan' in request.POST:
             controls = request.POST.items()
             try:
                 c = form.validate(controls)
@@ -163,7 +170,7 @@ def view_edit(request):
         return id_not_found(request)
     form = get_form(request, EditSchema)
     if request.POST:
-        if 'save' in request.POST:
+        if 'simpan' in request.POST:
             controls = request.POST.items()
             try:
                 c = form.validate(controls)
@@ -191,10 +198,10 @@ def view_delete(request):
     row = q.first()
     if not row:
         return id_not_found(request)
-    form = Form(colander.Schema(), buttons=('delete','cancel'))
+    form = Form(colander.Schema(), buttons=('hapus','batal'))
     if request.POST:
-        if 'delete' in request.POST:
-            msg = 'Group ID {id} {name} has been deleted.'.format(
+        if 'hapus' in request.POST:
+            msg = 'Group ID {id} {name} berhasil dihapus.'.format(
                     id=row.id, name=row.group_name)
             q.delete()
             DBSession.flush()

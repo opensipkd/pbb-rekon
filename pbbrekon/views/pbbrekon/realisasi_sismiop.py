@@ -55,7 +55,7 @@ def _DTnumber(chain):
 ########                    
 # List #
 ########    
-@view_config(route_name='pbb-rekon-realisasi-pospbb', renderer='templates/realisasi-pospbb/list.pt')
+@view_config(route_name='pbb-rekon-realisasi-sismiop', renderer='templates/realisasi-sismiop/list.pt')
 def view_list(request):
     #rows = DBSession.query(Group).order_by('group_name')
     return dict(module='Rekonsiliasi',
@@ -73,33 +73,31 @@ def get_columns():
     columns.append(ColumnDT('jml_sppt_yg_dibayar',mData='jml_sppt_yg_dibayar', filter=_DTnumber))
     columns.append(ColumnDT('tgl_pembayaran_sppt',mData='tgl_pembayaran_sppt', filter=_DTdate))
     
-    query = PosPbbDBSession.query(func.concat(PosPembayaranSppt.kd_propinsi,
-                                              PosPembayaranSppt.kd_dati2,
-                                              PosPembayaranSppt.kd_kecamatan,
-                                              PosPembayaranSppt.kd_kelurahan,
-                                              PosPembayaranSppt.kd_blok,
-                                              PosPembayaranSppt.no_urut, 
-                                              PosPembayaranSppt.kd_jns_op, 
-                                              PosPembayaranSppt.thn_pajak_sppt, 
-                                              PosPembayaranSppt.pembayaran_sppt_ke).label('id'),
-                                  func.concat(PosPembayaranSppt.kd_propinsi,
-                                              PosPembayaranSppt.kd_dati2,
-                                              PosPembayaranSppt.kd_kecamatan,
-                                              PosPembayaranSppt.kd_kelurahan,
-                                              PosPembayaranSppt.kd_blok,
-                                              PosPembayaranSppt.no_urut, 
-                                              PosPembayaranSppt.kd_jns_op).label('nop'),
-                                  PosPembayaranSppt.thn_pajak_sppt, 
-                                  PosPembayaranSppt.pembayaran_sppt_ke, 
-                                  PosPembayaranSppt.denda_sppt, 
-                                  PosPembayaranSppt.jml_sppt_yg_dibayar,
-                                  PosPembayaranSppt.tgl_pembayaran_sppt)    
+    query = PbbDBSession.query(func.concat(PembayaranSppt.kd_propinsi,
+                         func.concat(PembayaranSppt.kd_dati2,
+                         func.concat(PembayaranSppt.kd_kecamatan,
+                         func.concat(PembayaranSppt.kd_kelurahan,
+                         func.concat(PembayaranSppt.kd_blok,
+                         func.concat(PembayaranSppt.no_urut, 
+                         func.concat(PembayaranSppt.kd_jns_op, 
+                         func.concat(PembayaranSppt.thn_pajak_sppt, PembayaranSppt.pembayaran_sppt_ke)))))))).label('id'),
+                         func.concat(PembayaranSppt.kd_propinsi,
+                         func.concat(PembayaranSppt.kd_dati2,
+                         func.concat(PembayaranSppt.kd_kecamatan,
+                         func.concat(PembayaranSppt.kd_kelurahan,
+                         func.concat(PembayaranSppt.kd_blok,
+                         func.concat(PembayaranSppt.no_urut, PembayaranSppt.kd_jns_op)))))).label('nop'),
+                         PembayaranSppt.thn_pajak_sppt, 
+                         PembayaranSppt.pembayaran_sppt_ke, 
+                         PembayaranSppt.denda_sppt, 
+                         PembayaranSppt.jml_sppt_yg_dibayar,
+                         PembayaranSppt.tgl_pembayaran_sppt)    
     return columns, query
 
 ########                    
 # ACT #
 ########      
-@view_config(route_name='pbb-rekon-realisasi-pospbb-act', renderer='json')
+@view_config(route_name='pbb-rekon-realisasi-sismiop-act', renderer='json')
 def view_grid(request):
     req = request
     ses = req.session
@@ -112,39 +110,39 @@ def view_grid(request):
     date_from = 'date_from' in req.params and req.params['date_from']\
                                 or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
     date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
+    
     ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
     ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
 
     if url_dict['act'] == 'grid':
         columns, query = get_columns()
-        
-        qry = query.filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
-        rowTable = DataTables(req.GET, PosPembayaranSppt, qry, columns)
+        qry = query.filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        rowTable = DataTables(req.GET, PembayaranSppt, qry, columns)
         return rowTable.output_result()
 
     elif url_dict['act'] == 'rekon':
-        query = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
-                                      PosPembayaranSppt.kd_dati2,
-                                      PosPembayaranSppt.kd_kecamatan,
-                                      PosPembayaranSppt.kd_kelurahan,
-                                      PosPembayaranSppt.kd_blok,
-                                      PosPembayaranSppt.no_urut, 
-                                      PosPembayaranSppt.kd_jns_op, 
-                                      PosPembayaranSppt.thn_pajak_sppt, 
-                                      PosPembayaranSppt.pembayaran_sppt_ke).\
-                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        query = PbbDBSession.query(PembayaranSppt.kd_propinsi,
+                                   PembayaranSppt.kd_dati2,
+                                   PembayaranSppt.kd_kecamatan,
+                                   PembayaranSppt.kd_kelurahan,
+                                   PembayaranSppt.kd_blok,
+                                   PembayaranSppt.no_urut, 
+                                   PembayaranSppt.kd_jns_op, 
+                                   PembayaranSppt.thn_pajak_sppt, 
+                                   PembayaranSppt.pembayaran_sppt_ke).\
+                            filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rows = query.all()
     
-        queryPbb = PbbDBSession.query(PembayaranSppt.kd_propinsi,
-                                      PembayaranSppt.kd_dati2,
-                                      PembayaranSppt.kd_kecamatan,
-                                      PembayaranSppt.kd_kelurahan,
-                                      PembayaranSppt.kd_blok,
-                                      PembayaranSppt.no_urut, 
-                                      PembayaranSppt.kd_jns_op, 
-                                      PembayaranSppt.thn_pajak_sppt, 
-                                      PembayaranSppt.pembayaran_sppt_ke).\
-                    filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        queryPbb = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
+                                         PosPembayaranSppt.kd_dati2,
+                                         PosPembayaranSppt.kd_kecamatan,
+                                         PosPembayaranSppt.kd_kelurahan,
+                                         PosPembayaranSppt.kd_blok,
+                                         PosPembayaranSppt.no_urut, 
+                                         PosPembayaranSppt.kd_jns_op, 
+                                         PosPembayaranSppt.thn_pajak_sppt, 
+                                         PosPembayaranSppt.pembayaran_sppt_ke).\
+                                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rowPbbs = queryPbb.all()
         rowNotFound = []
         if len(rows) != len(rowPbbs):
@@ -152,22 +150,22 @@ def view_grid(request):
         #print "**DEBUG**", len(rows), len(rowPbbs)
         
         columns,query = get_columns()
-        qry = query.filter(tuple_(PosPembayaranSppt.kd_propinsi,
-                                  PosPembayaranSppt.kd_dati2,
-                                  PosPembayaranSppt.kd_kecamatan,
-                                  PosPembayaranSppt.kd_kelurahan,
-                                  PosPembayaranSppt.kd_blok,
-                                  PosPembayaranSppt.no_urut, 
-                                  PosPembayaranSppt.kd_jns_op, 
-                                  PosPembayaranSppt.thn_pajak_sppt, 
-                                  PosPembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
+        qry = query.filter(tuple_(PembayaranSppt.kd_propinsi,
+                                  PembayaranSppt.kd_dati2,
+                                  PembayaranSppt.kd_kecamatan,
+                                  PembayaranSppt.kd_kelurahan,
+                                  PembayaranSppt.kd_blok,
+                                  PembayaranSppt.no_urut, 
+                                  PembayaranSppt.kd_jns_op, 
+                                  PembayaranSppt.thn_pajak_sppt, 
+                                  PembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
                     
-        rowTable = DataTables(req.GET, PosPembayaranSppt, qry, columns)
+        rowTable = DataTables(req.GET, PembayaranSppt, qry, columns)
         return rowTable.output_result()
         
     elif url_dict['act'] == 'update':
         bayar.set_raw(req.params['id'])
-        query = PosPbbDBSession.query(PosPembayaranSppt).\
+        query = PbbDBSession.query(PembayaranSppt).\
                     filter_by(kd_propinsi        = bayar['kd_propinsi'],
                               kd_dati2           = bayar['kd_dati2'],
                               kd_kecamatan       = bayar['kd_kecamatan'],
@@ -179,7 +177,7 @@ def view_grid(request):
                               pembayaran_sppt_ke = bayar['pembayaran_sppt_ke'])
         row = query.first()
         if row:
-            rowPbb = PembayaranSppt()
+            rowPbb = PosPembayaranSppt()
             rowPbb.kd_propinsi         = unicode(row.kd_propinsi)
             rowPbb.kd_dati2            = unicode(row.kd_dati2)
             rowPbb.kd_kecamatan        = unicode(row.kd_kecamatan)
@@ -197,8 +195,8 @@ def view_grid(request):
             rowPbb.tgl_pembayaran_sppt = row.tgl_pembayaran_sppt
             rowPbb.nip_rekam_byr_sppt  = unicode(row.nip_rekam_byr_sppt)
             try:
-                PbbDBSession.add(rowPbb)
-                PbbDBSession.flush()
+                PosPbbDBSession.add(rowPbb)
+                PosPbbDBSession.flush()
             except:
                 return dict(status=0,message='Gagal %s' %bayar.get_raw())
         return dict(status=1,message='Sukses')                
@@ -206,11 +204,11 @@ def view_grid(request):
 ########                    
 # CSV #
 ########          
-@view_config(route_name='pbb-rekon-realisasi-pospbb-csv', renderer='csv')
+@view_config(route_name='pbb-rekon-realisasi-sismiop-csv', renderer='csv')
 def view_csv(request):
     req = request
     ses = req.session
-    params = req.params
+    params   = req.params
     url_dict = req.matchdict 
     # if not 'logged' in ses or   not ses['logged'] or ses['userid']!='sa':
         # url = self.request.resource_url(self.context, '')
@@ -220,32 +218,33 @@ def view_csv(request):
     date_from = 'date_from' in req.params and req.params['date_from']\
                                 or datetime.now().strftime('%d-%m-%Y') #"07-09-2015"
     date_to   = 'date_to' in req.params and req.params['date_to'] or date_from
+    
     ddate_from = datetime.strptime(date_from,'%d-%m-%Y')
     ddate_to   = datetime.strptime(date_to,'%d-%m-%Y')
     
     if url_dict['csv'] == 'rekon':
-        query = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
-                                      PosPembayaranSppt.kd_dati2,
-                                      PosPembayaranSppt.kd_kecamatan,
-                                      PosPembayaranSppt.kd_kelurahan,
-                                      PosPembayaranSppt.kd_blok,
-                                      PosPembayaranSppt.no_urut, 
-                                      PosPembayaranSppt.kd_jns_op, 
-                                      PosPembayaranSppt.thn_pajak_sppt, 
-                                      PosPembayaranSppt.pembayaran_sppt_ke).\
-                    filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        query = PbbDBSession.query(PembayaranSppt.kd_propinsi,
+                                   PembayaranSppt.kd_dati2,
+                                   PembayaranSppt.kd_kecamatan,
+                                   PembayaranSppt.kd_kelurahan,
+                                   PembayaranSppt.kd_blok,
+                                   PembayaranSppt.no_urut, 
+                                   PembayaranSppt.kd_jns_op, 
+                                   PembayaranSppt.thn_pajak_sppt, 
+                                   PembayaranSppt.pembayaran_sppt_ke).\
+                             filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         rows = query.all()
 
-        queryPbb = PbbDBSession.query(PembayaranSppt.kd_propinsi,
-                                      PembayaranSppt.kd_dati2,
-                                      PembayaranSppt.kd_kecamatan,
-                                      PembayaranSppt.kd_kelurahan,
-                                      PembayaranSppt.kd_blok,
-                                      PembayaranSppt.no_urut, 
-                                      PembayaranSppt.kd_jns_op, 
-                                      PembayaranSppt.thn_pajak_sppt, 
-                                      PembayaranSppt.pembayaran_sppt_ke).\
-                    filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        queryPbb = PosPbbDBSession.query(PosPembayaranSppt.kd_propinsi,
+                                         PosPembayaranSppt.kd_dati2,
+                                         PosPembayaranSppt.kd_kecamatan,
+                                         PosPembayaranSppt.kd_kelurahan,
+                                         PosPembayaranSppt.kd_blok,
+                                         PosPembayaranSppt.no_urut, 
+                                         PosPembayaranSppt.kd_jns_op, 
+                                         PosPembayaranSppt.thn_pajak_sppt, 
+                                         PosPembayaranSppt.pembayaran_sppt_ke).\
+                                   filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
                     
         rowPbbs = queryPbb.all()
         rowNotFound = []
@@ -253,15 +252,15 @@ def view_csv(request):
             rowNotFound = list(set(rows) - set(rowPbbs))
         
         columns,query = get_columns()
-        qry = query.filter(tuple_(PosPembayaranSppt.kd_propinsi,
-                                  PosPembayaranSppt.kd_dati2,
-                                  PosPembayaranSppt.kd_kecamatan,
-                                  PosPembayaranSppt.kd_kelurahan,
-                                  PosPembayaranSppt.kd_blok,
-                                  PosPembayaranSppt.no_urut, 
-                                  PosPembayaranSppt.kd_jns_op, 
-                                  PosPembayaranSppt.thn_pajak_sppt, 
-                                  PosPembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
+        qry = query.filter(tuple_(PembayaranSppt.kd_propinsi,
+                                  PembayaranSppt.kd_dati2,
+                                  PembayaranSppt.kd_kecamatan,
+                                  PembayaranSppt.kd_kelurahan,
+                                  PembayaranSppt.kd_blok,
+                                  PembayaranSppt.no_urut, 
+                                  PembayaranSppt.kd_jns_op, 
+                                  PembayaranSppt.thn_pajak_sppt, 
+                                  PembayaranSppt.pembayaran_sppt_ke).in_(rowNotFound))
         
         r = qry.first()
         header = r.keys()
@@ -277,13 +276,13 @@ def view_csv(request):
 
         return {
           'header': header,
-          'rows'  : rows,
+          'rows': rows,
         }        
         
     elif url_dict['csv'] == 'transaksi':
         columns, query = get_columns()
         
-        qry = query.filter(PosPembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
+        qry = query.filter(PembayaranSppt.tgl_pembayaran_sppt.between(ddate_from,ddate_to))
         r = qry.first()
         
         header = r.keys()
